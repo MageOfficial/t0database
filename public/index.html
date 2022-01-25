@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>T0 Database</title>
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+    <script src="socket.io.js"></script>
+
+</head>
+
+<body style="background-color:rgb(154, 158, 157)">
+    <input type="text" id="minGames" size="10" name="minGames">
+    <label for="minGames"> Min Games</label><br>
+
+    <input type="text" id="depth" size="10" name="depth">
+    <label for="depth"> Depth</label><br>
+
+    <input type="text" id="player" size="10" name="player">
+    <label for="player"> Player</label><br>
+
+
+    <input type="checkbox" id="white" name="white">
+    <label for="white"> White</label><br>
+
+    <input type="checkbox" id="black" name="black">
+    <label for="black"> Black</label><br>
+
+    <button id='search'>Search</button>
+
+    <script>
+        var socket = io();
+        $('#search').on('click', function () {
+            minGames = $('#minGames').val();
+            depth = $('#depth').val();
+            player = $('#player').val();
+            colorBlack =  document.getElementById("black").checked;  
+            colorWhite = document.getElementById("white").checked
+
+            console.log(minGames)
+            console.log(depth)
+            console.log(black)
+            console.log(white)
+
+            socket.emit('search', player, colorWhite, colorBlack, Number(depth), Number(minGames));
+
+        });
+        socket.on('searchcomplete', function (msg) {
+            console.log(msg)
+        });
+    </script>
+    </div>
+</body>
+
+</html>
