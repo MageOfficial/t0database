@@ -27,7 +27,12 @@
 
     <button id='search'>Search</button>
 
+
+
+    <p id="output"></p>
+
     <script>
+
         var socket = io();
         $('#search').on('click', function () {
             minGames = $('#minGames').val();
@@ -46,6 +51,7 @@
         });
         socket.on('searchcomplete', function (msg) {
             console.log(msg)
+            document.getElementById("output").innerHTML = msg;
         });
     </script>
     </div>
