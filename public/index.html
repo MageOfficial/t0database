@@ -26,10 +26,8 @@
     <label for="black"> Black</label><br>
 
     <button id='search'>Search</button>
-
-
-
-    <p id="output"></p>
+    <br></br>
+    <textarea id="output" rows="100" cols="100"></textarea>
 
     <script>
 
@@ -41,17 +39,11 @@
             colorBlack =  document.getElementById("black").checked;  
             colorWhite = document.getElementById("white").checked
 
-            console.log(minGames)
-            console.log(depth)
-            console.log(black)
-            console.log(white)
-
             socket.emit('search', player, colorWhite, colorBlack, Number(depth), Number(minGames));
 
         });
         socket.on('searchcomplete', function (msg) {
-            console.log(msg)
-            document.getElementById("output").innerHTML = msg;
+            document.getElementById("output").innerHTML = msg.replaceAll('\\n', "&#13;&#10;");
         });
     </script>
     </div>
