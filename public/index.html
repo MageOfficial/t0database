@@ -38,12 +38,13 @@
             player = $('#player').val();
             colorBlack =  document.getElementById("black").checked;  
             colorWhite = document.getElementById("white").checked
-
+            console.time("Search")
             socket.emit('search', player, colorWhite, colorBlack, Number(depth), Number(minGames));
-
+            
         });
         socket.on('searchcomplete', function (msg) {
             document.getElementById("output").innerHTML = msg.replaceAll('\\n', "&#13;&#10;");
+            console.timeEnd("Search")
         });
     </script>
     </div>

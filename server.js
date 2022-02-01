@@ -36,6 +36,9 @@ io.on('connection', function (socket) {
             var printName = name
             if (name != "Initial State") {
                 printName = chess.raw.pgnFuncs.fromMove(node.move[0], chess.rawBoard, chess.rawAction)
+                for(var i=1; i<node.move.length;i++){
+                    printName += " " + chess.raw.pgnFuncs.fromMove(node.move[i], chess.rawBoard, chess.rawAction)
+                }
             }
             //console.log(indent + printName + " : total " + node._total + " , number = " + node._num + " , UCB1 = " + node.UCB1() )
             if (node.total >= gameMin) {
@@ -43,7 +46,9 @@ io.on('connection', function (socket) {
                 for (name of Object.keys(node.children)) {
 
                     var tempChess = chess.copy()
-                    tempChess.raw.boardFuncs.move(tempChess.rawBoard, node.children[name].move[0]);
+                    for(var i=0; i<node.children[name].move.length;i++){
+                    tempChess.raw.boardFuncs.move(tempChess.rawBoard, node.children[name].move[i]);
+                    }
                     tempChess.rawBoardHistory.push(tempChess.raw.boardFuncs.copy(tempChess.rawBoard));
                     tempChess.rawAction++;
                     outputInfo(tempChess, name, node.children[name], indent + "  ",gameMin)
