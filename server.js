@@ -56,7 +56,9 @@ io.on('connection', function (socket) {
             }
             return outputStr;
         }
-
+        /*
+        Currently Unused but will be used to conclude what lines are complete loses and should not be looked at
+        
         function mateprop(child, value) { //used for when a node is found to be mate
             child.total = value;
             child.total += 1;
@@ -79,7 +81,7 @@ io.on('connection', function (socket) {
                 mateprop(child.parent, -value);
             }
         }
-
+        */
         function add(child, value) {
             child.whitewin += value;
             child.total += 1;
