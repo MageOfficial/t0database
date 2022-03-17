@@ -32,13 +32,9 @@ io.on('connection', function (socket) {
         var outputStr=""
         function outputInfo(chess, name, node, indent = "  ", gameMin) {
 
-
             var printName = name
             if (name != "Initial State") {
-                printName = chess.raw.pgnFuncs.fromMove(node.move[0], chess.rawBoard, chess.rawAction)
-                for(var i=1; i<node.move.length;i++){
-                    printName += " " + chess.raw.pgnFuncs.fromMove(node.move[i], chess.rawBoard, chess.rawAction)
-                }
+                printName = " " + chess.raw.pgnFuncs.fromAction(node.move, chess.rawBoard, chess.rawAction) 
             }
             //console.log(indent + printName + " : total " + node._total + " , number = " + node._num + " , UCB1 = " + node.UCB1() )
             if (node.total >= gameMin) {
@@ -90,14 +86,30 @@ io.on('connection', function (socket) {
         function searchData(player, colorWhite, colorBlack, depth, minGames) {
             csv().fromFile(csvFilePath).then((jsonObj) => {
                 var tree = new Leaf();
+                //var numOfBroke=0;
+                //var i=0;
                 for (game of jsonObj) {
-                    if ((player == "") || ((colorBlack * (game.BlackPlayer == player)) || (colorWhite * (game.WhitePlayer == player)))) {
+                    //i++;
+                    if ((player == "") || ((colorBlack * (game.BlackPlayer.toLowerCase() == player.toLowerCase())) || (colorWhite * (game.WhitePlayer.toLowerCase() == player.toLowerCase())))) {
                         var chess = new Chess();
                         chess.skipDetection = true;
                         var input = game.Game;
+                        if(input.indexOf("[") ===-1){
+                            input='[Board "Standard - Turn Zero"]\n[Mode "5D"]\n'+input;
+                        }
                         chess.import(input);
+                        
                         game.Game = chess.export('5dpgn');
-
+                        /*
+                        if(game.Game=='[Board "Standard"]\n[Mode "5D"]\n'||game.Game=='[Board "Standard - Turn Zero"]\n[Mode "5D"]\n'){
+                            console.log(chess.print())
+                            console.log("Game Num = " + i)
+                            numOfBroke+=1
+                            console.log("\n Broke Game")
+                            console.log(input)
+                            console.log("\n")
+                        }
+                        */
                         var current = tree
                         for (let i = 0; (i < chess.rawActionHistory.length && i < depth); i++) {
                             var newLeaf = new Leaf(chess.rawActionHistory[i], current);
@@ -116,6 +128,7 @@ io.on('connection', function (socket) {
                     }
                 }
                 var chess = new Chess();
+                chess.reset("turn_zero")
                 socket.emit('searchcomplete', outputInfo(chess, "Initial State", tree,"  ", minGames));
                 var node = tree
                 var chess = new Chess();
