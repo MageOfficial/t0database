@@ -27,7 +27,7 @@ io.on('connection', function (socket) {
         const csv = require('csvtojson')
         var Chess = require('5d-chess-js');
         var readlineSync = require('readline-sync');
-
+        
         searchData(player, colorWhite, colorBlack, depth, minGames)
         var outputStr=""
         function outputInfo(chess, name, node, indent = "  ", gameMin) {

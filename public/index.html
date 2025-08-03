@@ -3,27 +3,55 @@
 
 <head>
     <title>T0 Database</title>
+    <style>
+        input[type=range] {
+        appearance: none;
+        width: 150px;
+        background: #ccc;
+        height: 6px;
+        border-radius: 3px;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+        appearance: none;
+        width: 14px;
+        height: 14px;
+        background: #000;
+        border-radius: 50%;
+        cursor: pointer;
+        }
+
+        input[type=range]::-moz-range-thumb {
+        width: 14px;
+        height: 14px;
+        background: #000;
+        border: none;
+        border-radius: 50%;
+        cursor: pointer;
+        }
+    </style>
     <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
     <script src="socket.io.js"></script>
 
 </head>
 
 <body style="background-color:rgb(154, 158, 157)">
-    <input type="text" id="minGames" size="10" name="minGames">
+    <input type="text" id="minGames" size="10" name="minGames" style="width: 80px;">
     <label for="minGames"> Min Games</label><br>
 
-    <input type="text" id="depth" size="10" name="depth">
+    <input type="number" id="depth" name="depth" size="10" value="5" min="0" style="width: 80px;">
     <label for="depth"> Depth</label><br>
 
-    <input type="text" id="player" size="10" name="player">
+    <input type="text" id="player" size="10" name="player" style="width: 80px;">
     <label for="player"> Player</label><br>
 
-
-    <input type="checkbox" id="white" name="white">
-    <label for="white"> White</label><br>
-
-    <input type="checkbox" id="black" name="black">
-    <label for="black"> Black</label><br>
+    <label for="colorSlider">Color</label><br>
+    <input type="range" id="colorSlider" min="0" max="2" step="1" value="1" style="width: 150px;">
+    <div style="display: flex; justify-content: space-between; width: 150px;">
+    <span>White</span>
+    <span>Both</span>
+    <span>Black</span>
+    </div>
 
     <button id='search'>Search</button>
     <br></br>
@@ -36,10 +64,12 @@
             minGames = $('#minGames').val();
             depth = $('#depth').val();
             player = $('#player').val();
-            colorBlack =  document.getElementById("black").checked;  
-            colorWhite = document.getElementById("white").checked
+            const sliderValue = document.getElementById('colorSlider').value;
+            const colorWhite = sliderValue === "0" || sliderValue === "1";
+            const colorBlack = sliderValue === "2" || sliderValue === "1";
             console.time("Search")
-            socket.emit('search', player, colorWhite, colorBlack, Number(depth), Number(minGames));
+
+            socket.emit('search', player, colorWhite, colorBlack, depth==""?10:Number(depth), Number(minGames));
             
         });
         socket.on('searchcomplete', function (msg) {
