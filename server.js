@@ -30,28 +30,50 @@ io.on('connection', function (socket) {
         
         searchData(player, colorWhite, colorBlack, depth, minGames)
         var outputStr=""
-        function outputInfo(chess, name, node, indent = "  ", gameMin) {
-
-            var printName = name
-            if (name != "Initial State") {
-                printName = " " + chess.raw.pgnFuncs.fromAction(node.move, chess.rawBoard, chess.rawAction) 
+        function outputInfo(chess, name, node, gameMin, prefix = "", isLast = false, isRoot = true) {
+            var printName = name;
+            if (!isRoot) {
+                printName = " " + chess.raw.pgnFuncs.fromAction(node.move, chess.rawBoard, chess.rawAction);
             }
-            //console.log(indent + printName + " : total " + node._total + " , number = " + node._num + " , UCB1 = " + node.UCB1() )
-            if (node.total >= gameMin) {
-                outputStr += indent + (chess.rawAction) + "." + printName + " : WWR = " + (node.whitewin / node.total).toFixed(3) + " : Games = " + node.total + "\n"
-                for (name of Object.keys(node.children)) {
 
-                    var tempChess = chess.copy()
-                    for(var i=0; i<node.children[name].move.length;i++){
-                    tempChess.raw.boardFuncs.move(tempChess.rawBoard, node.children[name].move[i]);
+            if (node.total >= gameMin) {
+                if (isRoot) {
+                    outputStr += printName +
+                        " : WWR = " + (node.whitewin / node.total).toFixed(3) +
+                        " : Games = " + node.total + "\n";
+                } else {
+                    let branch = prefix + (isLast ? "└─ " : "├─ ");
+                    if(chess.rawAction%2){
+                        numberPrefix=(chess.rawAction+1)/2 + ".";
+                    }
+                    else{
+                        numberPrefix=Math.ceil(chess.rawAction/2) + ".../";
+                    }
+                    
+                    outputStr += branch + numberPrefix + printName +
+                        " : WWR = " + (node.whitewin / node.total).toFixed(3) +
+                        " : Games = " + node.total + "\n";
+                }
+
+                const childKeys = Object.keys(node.children);
+                childKeys.forEach((childName, idx) => {
+                    const childNode = node.children[childName];
+                    const tempChess = chess.copy();
+                    for (let i = 0; i < childNode.move.length; i++) {
+                        tempChess.raw.boardFuncs.move(tempChess.rawBoard, childNode.move[i]);
                     }
                     tempChess.rawBoardHistory.push(tempChess.raw.boardFuncs.copy(tempChess.rawBoard));
                     tempChess.rawAction++;
-                    outputInfo(tempChess, name, node.children[name], indent + "  ",gameMin)
-                }
+
+                    let newPrefix = prefix + (isRoot ? "" : (isLast ? "   " : "│  "));
+                    let childIsLast = (idx === childKeys.length - 1);
+                    outputInfo(tempChess, childName, childNode, gameMin, newPrefix, childIsLast, false);
+                });
             }
             return outputStr;
         }
+
+
         /*
         Currently Unused but will be used to conclude what lines are complete loses and should not be looked at
         
@@ -86,6 +108,7 @@ io.on('connection', function (socket) {
             }
         }
         function searchData(player, colorWhite, colorBlack, depth, minGames) {
+            socket.emit('update', "building tree...");
             csv().fromFile(csvFilePath).then((jsonObj) => {
                 var tree = new Leaf();
                 //var numOfBroke=0;
@@ -129,9 +152,10 @@ io.on('connection', function (socket) {
 
                     }
                 }
+                socket.emit('update', "filtering games...");
                 var chess = new Chess();
                 chess.reset("turn_zero")
-                socket.emit('searchcomplete', outputInfo(chess, "Initial State", tree,"  ", minGames));
+                socket.emit('searchcomplete', outputInfo(chess, "Start", tree, minGames, "  "));
                 var node = tree
                 var chess = new Chess();
                 //console.log(tree)

@@ -36,7 +36,7 @@
 </head>
 
 <body style="background-color:rgb(154, 158, 157)">
-    <input type="text" id="minGames" size="10" name="minGames" style="width: 80px;">
+    <input type="number" id="minGames" name="minGames" size="10" value="5" min="0" style="width: 80px;">
     <label for="minGames"> Min Games</label><br>
 
     <input type="number" id="depth" name="depth" size="10" value="5" min="0" style="width: 80px;">
@@ -75,6 +75,9 @@
         socket.on('searchcomplete', function (msg) {
             document.getElementById("output").innerHTML = msg.replaceAll('\\n', "&#13;&#10;");
             console.timeEnd("Search")
+        });
+        socket.on('update', function (msg) {
+            document.getElementById("output").innerHTML = msg.replaceAll('\\n', "&#13;&#10;");
         });
     </script>
     </div>
